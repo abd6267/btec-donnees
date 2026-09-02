@@ -13,7 +13,7 @@ export async function GET() {
     candidatsInscrits,
     candidatsRecrutes,
     enFormation,
-    placÃ©s,
+    placés,
     entretiens,
     entreprises,
     formations,

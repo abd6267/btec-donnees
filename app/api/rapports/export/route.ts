@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const wsCandidats = XLSX.utils.json_to_sheet(
       candidats.map((c) => ({
         Nom: c.nom,
-        PrÃ©nom: c.prenom,
+        Prénom: c.prenom,
         Poste: c.posteRecherche,
         Statut: c.statut,
         'Date inscription': c.dateInscription,

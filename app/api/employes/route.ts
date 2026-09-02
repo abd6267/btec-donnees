@@ -1,16 +1,16 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 const prisma = new PrismaClient({ adapter });
 
 // GET /api/employes?statut=EN_ATTENTE|EMBAUCHE|DEBAUCHE
-// Renvoie les employés (candidats validés) filtrés par statutEmploi,
-// avec le candidat et l'entreprise associés.
+// Renvoie les employÃ©s (candidats validÃ©s) filtrÃ©s par statutEmploi,
+// avec le candidat et l'entreprise associÃ©s.
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const statut = searchParams.get('statut');

@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import bcrypt from 'bcryptjs';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -14,8 +14,8 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findUnique({ where: { username } });
 
-  console.log('DEBUG - username reçu:', JSON.stringify(username));
-  console.log('DEBUG - user trouvé:', user ? user.username : 'AUCUN');
+  console.log('DEBUG - username reÃ§u:', JSON.stringify(username));
+  console.log('DEBUG - user trouvÃ©:', user ? user.username : 'AUCUN');
 
   if (!user) {
     return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Identifiants incorrects' }, { status: 401 });
   }
 
-  // Enregistre la dernière connexion — module Gestion des Comptes.
+  // Enregistre la derniÃ¨re connexion â€” module Gestion des Comptes.
   await prisma.user.update({
     where: { id: user.id },
     data: { derniereConnexion: new Date() },

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -13,7 +13,7 @@ export async function GET() {
     candidatsInscrits,
     candidatsRecrutes,
     enFormation,
-    placés,
+    placÃ©s,
     entretiens,
     entreprises,
     formations,
@@ -51,7 +51,7 @@ export async function GET() {
     candidatsInscrits,
     candidatsRecrutes,
     enFormation,
-    placés,
+    placÃ©s,
     entretiens,
     revenus: revenusMensuels,
     depenses: depensesMensuelles,

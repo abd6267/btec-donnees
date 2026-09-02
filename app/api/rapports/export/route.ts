@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import * as XLSX from 'xlsx';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const wsCandidats = XLSX.utils.json_to_sheet(
       candidats.map((c) => ({
         Nom: c.nom,
-        Prénom: c.prenom,
+        PrÃ©nom: c.prenom,
         Poste: c.posteRecherche,
         Statut: c.statut,
         'Date inscription': c.dateInscription,
@@ -35,10 +35,10 @@ export async function GET(request: Request) {
 
     const wsFinance = XLSX.utils.json_to_sheet(
       paiements.map((p) => ({
-        Libellé: p.libelle,
+        LibellÃ©: p.libelle,
         Type: p.type,
         Montant: p.montant,
-        Catégorie: p.categorie,
+        CatÃ©gorie: p.categorie,
         Statut: p.statut,
         'Date paiement': p.datePaiement,
       }))
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         Candidat: `${i.candidat.nom} ${i.candidat.prenom}`,
         Formation: i.formation.nom,
         Statut: i.statut,
-        Résultat: i.resultat,
+        RÃ©sultat: i.resultat,
         Mention: i.mention,
       }))
     );
@@ -66,5 +66,5 @@ export async function GET(request: Request) {
     });
   }
 
-  return NextResponse.json({ error: 'Format non supporté' }, { status: 400 });
+  return NextResponse.json({ error: 'Format non supportÃ©' }, { status: 400 });
 }

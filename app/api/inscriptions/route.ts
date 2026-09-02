@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -10,7 +10,7 @@ const prisma = new PrismaClient({ adapter });
 
 // GET /api/inscriptions
 // Liste toutes les inscriptions (historique de formation par candidat),
-// triées par date de création décroissante pour la page "Formation".
+// triÃ©es par date de crÃ©ation dÃ©croissante pour la page "Formation".
 export async function GET() {
   const inscriptions = await prisma.inscription.findMany({
     include: {
@@ -25,7 +25,7 @@ export async function GET() {
 }
 
 // POST /api/inscriptions
-// Inscrit un candidat à une formation (démarre son historique de suivi).
+// Inscrit un candidat Ã  une formation (dÃ©marre son historique de suivi).
 export async function POST(request: Request) {
   const body = await request.json();
 
@@ -53,8 +53,8 @@ export async function POST(request: Request) {
 }
 
 // PATCH /api/inscriptions
-// Met à jour le suivi d'une inscription : statut, résultat, mention,
-// dates, attestation. Body attendu : { id, ...champs à modifier }.
+// Met Ã  jour le suivi d'une inscription : statut, rÃ©sultat, mention,
+// dates, attestation. Body attendu : { id, ...champs Ã  modifier }.
 export async function PATCH(request: Request) {
   const body = await request.json();
 

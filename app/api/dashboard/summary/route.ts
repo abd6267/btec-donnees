@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -17,7 +17,7 @@ function daysAgo(date: Date) {
 function timeAgo(date: Date) {
   const diffMs = Date.now() - new Date(date).getTime();
   const min = Math.floor(diffMs / 60000);
-  if (min < 1) return "À l'instant";
+  if (min < 1) return "Ã€ l'instant";
   if (min < 60) return `Il y a ${min} min`;
   const h = Math.floor(min / 60);
   if (h < 24) return `Il y a ${h}h`;
@@ -94,7 +94,7 @@ export async function GET() {
     entreprisesCeMois: entreprises.filter((e) => new Date(e.datePartenariat) >= debutMois).length,
   };
 
-  // --- Répartition des candidats par statut (donut) ---
+  // --- RÃ©partition des candidats par statut (donut) ---
   const statutCounts: Record<string, number> = {};
   for (const c of candidats) {
     statutCounts[c.statut] = (statutCounts[c.statut] || 0) + 1;
@@ -103,9 +103,9 @@ export async function GET() {
   const STATUT_LABELS: Record<string, string> = {
     NOUVEAU: 'Nouveaux dossiers',
     DOSSIER_INCOMPLET: 'Dossiers incomplets',
-    EN_ETUDE: 'En étude',
-    VALIDE: 'Validés',
-    REFUSE: 'Refusés',
+    EN_ETUDE: 'En Ã©tude',
+    VALIDE: 'ValidÃ©s',
+    REFUSE: 'RefusÃ©s',
   };
   const STATUT_COLORS: Record<string, string> = {
     NOUVEAU: '#16a34a',
@@ -120,14 +120,14 @@ export async function GET() {
     color: STATUT_COLORS[statut] || '#cbd5e1',
   }));
 
-  // --- Activités récentes (fusion multi-sources, triées par date) ---
+  // --- ActivitÃ©s rÃ©centes (fusion multi-sources, triÃ©es par date) ---
   type Activite = { type: string; title: string; sub: string; date: Date };
   const activites: Activite[] = [];
 
   for (const c of candidats.slice(0, 5)) {
     activites.push({
       type: 'candidat',
-      title: 'Nouveau dossier de candidature ajouté',
+      title: 'Nouveau dossier de candidature ajoutÃ©',
       sub: `${c.nom} ${c.prenom}`,
       date: new Date(c.dateInscription),
     });
@@ -135,7 +135,7 @@ export async function GET() {
   for (const e of entretiens.slice(0, 5)) {
     activites.push({
       type: 'entretien',
-      title: 'Entretien programmé',
+      title: 'Entretien programmÃ©',
       sub: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'Candidat',
       date: new Date(e.dateEntretien),
     });
@@ -144,8 +144,8 @@ export async function GET() {
     if (!e.dateEmbauche) continue;
     activites.push({
       type: 'embauche',
-      title: 'Nouvel employé embauché',
-      sub: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'Employé',
+      title: 'Nouvel employÃ© embauchÃ©',
+      sub: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'EmployÃ©',
       date: new Date(e.dateEmbauche),
     });
   }
@@ -153,15 +153,15 @@ export async function GET() {
     if (!e.dateDepart) continue;
     activites.push({
       type: 'debauche',
-      title: 'Employé débauché',
-      sub: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'Employé',
+      title: 'EmployÃ© dÃ©bauchÃ©',
+      sub: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'EmployÃ©',
       date: new Date(e.dateDepart),
     });
   }
   for (const ent of entreprises.slice(0, 3)) {
     activites.push({
       type: 'entreprise',
-      title: 'Nouveau partenaire enregistré',
+      title: 'Nouveau partenaire enregistrÃ©',
       sub: ent.nom,
       date: new Date(ent.datePartenariat),
     });
@@ -170,7 +170,7 @@ export async function GET() {
     if (p.statut !== 'PAYE' || !p.datePaiement) continue;
     activites.push({
       type: 'paiement',
-      title: p.type === 'RECETTE' ? 'Paiement reçu' : 'Dépense enregistrée',
+      title: p.type === 'RECETTE' ? 'Paiement reÃ§u' : 'DÃ©pense enregistrÃ©e',
       sub: p.libelle,
       date: new Date(p.datePaiement),
     });
@@ -186,7 +186,7 @@ export async function GET() {
     }));
   const dernieresActivites = dernieresActivitesToutes.slice(0, 6);
 
-  // --- Prochains rendez-vous (entretiens à venir) ---
+  // --- Prochains rendez-vous (entretiens Ã  venir) ---
   const prochainsRdvsTous = entretiens
     .filter((e) => new Date(e.dateEntretien) >= now)
     .sort((a, b) => new Date(a.dateEntretien).getTime() - new Date(b.dateEntretien).getTime())
@@ -196,7 +196,7 @@ export async function GET() {
         date: String(d.getDate()).padStart(2, '0'),
         mois: d.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase().replace('.', ''),
         nom: e.candidat ? `${e.candidat.nom} ${e.candidat.prenom}` : 'Candidat',
-        poste: e.candidat?.posteRecherche || '—',
+        poste: e.candidat?.posteRecherche || 'â€”',
         heure: d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       };
     });
@@ -211,7 +211,7 @@ export async function GET() {
     alertes.push({
       type: 'dossier',
       title: 'Dossiers incomplets',
-      sub: `${dossiersIncomplets.length} dossier(s) en attente de pièces`,
+      sub: `${dossiersIncomplets.length} dossier(s) en attente de piÃ¨ces`,
       date: new Date(),
     });
   }
@@ -220,13 +220,13 @@ export async function GET() {
   if (formesEnAttenteDepuisLongtemps.length > 0) {
     alertes.push({
       type: 'formation',
-      title: "Formés en attente d'insertion prolongée",
+      title: "FormÃ©s en attente d'insertion prolongÃ©e",
       sub: `${formesEnAttenteDepuisLongtemps.length} personne(s) en attente depuis plus de 30 jours`,
       date: new Date(),
     });
   }
 
-  // Paiements en retard : statut EN_RETARD, ou EN_ATTENTE avec échéance dépassée
+  // Paiements en retard : statut EN_RETARD, ou EN_ATTENTE avec Ã©chÃ©ance dÃ©passÃ©e
   const paiementsEnRetard = paiements.filter(
     (p) =>
       p.statut === 'EN_RETARD' ||
@@ -241,12 +241,12 @@ export async function GET() {
     });
   }
 
-  // TODO: contrats arrivant à expiration → nécessite un champ dateFinContrat sur Employe
+  // TODO: contrats arrivant Ã  expiration â†’ nÃ©cessite un champ dateFinContrat sur Employe
 
   const alertesFinales = alertes
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .map((a) => ({ ...a, time: timeAgo(a.date) }));
-  // Toutes les alertes sont déjà courtes par nature (une par catégorie), donc pas de version "limitée" séparée ici.
+  // Toutes les alertes sont dÃ©jÃ  courtes par nature (une par catÃ©gorie), donc pas de version "limitÃ©e" sÃ©parÃ©e ici.
 
   // --- Finances (ce mois) ---
   const paiementsCeMois = paiements.filter(
@@ -261,11 +261,11 @@ export async function GET() {
 
   const finances = paiements.length > 0
     ? { recettes, depenses, benefice: recettes - depenses }
-    : null; // pas encore de paiements enregistrés → on n'affiche pas de faux zéros trompeurs
+    : null; // pas encore de paiements enregistrÃ©s â†’ on n'affiche pas de faux zÃ©ros trompeurs
 
-  // --- Courbe "Statistiques globales" : candidats inscrits par mois sur l'année en cours ---
+  // --- Courbe "Statistiques globales" : candidats inscrits par mois sur l'annÃ©e en cours ---
   const anneeEnCours = now.getFullYear();
-  const MOIS_LABELS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+  const MOIS_LABELS = ['Jan', 'FÃ©v', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'AoÃ»t', 'Sep', 'Oct', 'Nov', 'DÃ©c'];
   const candidatsParMois = Array(12).fill(0);
   for (const c of candidats) {
     const d = new Date(c.dateInscription);
@@ -273,7 +273,7 @@ export async function GET() {
       candidatsParMois[d.getMonth()] += 1;
     }
   }
-  // On ne montre que jusqu'au mois courant (les mois futurs de l'année restent à 0, inutiles à afficher)
+  // On ne montre que jusqu'au mois courant (les mois futurs de l'annÃ©e restent Ã  0, inutiles Ã  afficher)
   const moisCourant = now.getMonth();
   const evolutionCandidats = MOIS_LABELS.slice(0, moisCourant + 1).map((mois, i) => ({
     mois,

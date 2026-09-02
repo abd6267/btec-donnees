@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { genererDocumentPdf, sauvegarderPdf } from '../../../../lib/documents/generatePdf';
 import {
   templateContratRecrutement,
@@ -14,7 +14,7 @@ import {
   templateCertificatTravail,
 } from '../../../../lib/documents/templates';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -24,7 +24,7 @@ const TITRES: Record<string, string> = {
   CONTRAT_RECRUTEMENT: 'Contrat de recrutement',
   CONTRAT_FORMATION: 'Contrat de formation',
   CONTRAT_PARTENARIAT: 'Contrat de partenariat',
-  RECU_PAIEMENT: 'Reçu de paiement',
+  RECU_PAIEMENT: 'ReÃ§u de paiement',
   FACTURE: 'Facture',
   ATTESTATION_FORMATION: 'Attestation de formation',
   CONVOCATION: 'Convocation',
@@ -109,14 +109,14 @@ export async function POST(request: Request) {
       }
       case 'CERTIFICAT_TRAVAIL': {
         const employe = await prisma.employe.findUnique({ where: { id: body.employeId }, include: { candidat: true, entreprise: true } });
-        if (!employe) return NextResponse.json({ error: 'Employé introuvable' }, { status: 404 });
+        if (!employe) return NextResponse.json({ error: 'EmployÃ© introuvable' }, { status: 404 });
         candidat = employe.candidat;
         entreprise = employe.entreprise;
         lignes = templateCertificatTravail(employe.candidat, employe, employe.entreprise);
         break;
       }
       default:
-        return NextResponse.json({ error: 'Type non géré' }, { status: 400 });
+        return NextResponse.json({ error: 'Type non gÃ©rÃ©' }, { status: 400 });
     }
 
     const pdfBytes = await genererDocumentPdf(TITRES[type], lignes);
@@ -137,6 +137,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, document, filePath });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Erreur lors de la génération' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Erreur lors de la gÃ©nÃ©ration' }, { status: 500 });
   }
 }

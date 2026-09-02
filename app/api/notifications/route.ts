@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -49,19 +49,19 @@ export async function GET() {
   const notifications = [
     ...paiementsEnRetard.map((p) => ({
       type: 'PAIEMENT_RETARD',
-      message: `Paiement en retard : ${p.libelle} (${p.montant.toLocaleString('fr-FR')} FCFA)${p.candidat ? ' — ' + p.candidat.nom + ' ' + p.candidat.prenom : ''}${p.entreprise ? ' — ' + p.entreprise.nom : ''}`,
+      message: `Paiement en retard : ${p.libelle} (${p.montant.toLocaleString('fr-FR')} FCFA)${p.candidat ? ' â€” ' + p.candidat.nom + ' ' + p.candidat.prenom : ''}${p.entreprise ? ' â€” ' + p.entreprise.nom : ''}`,
       date: p.dateEcheance,
       niveau: 'urgent',
     })),
     ...entretiensAujourdhui.map((e) => ({
       type: 'ENTRETIEN_AUJOURDHUI',
-      message: `Entretien aujourd'hui : ${e.candidat.nom} ${e.candidat.prenom} à ${new Date(e.dateEntretien).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
+      message: `Entretien aujourd'hui : ${e.candidat.nom} ${e.candidat.prenom} Ã  ${new Date(e.dateEntretien).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
       date: e.dateEntretien,
       niveau: 'info',
     })),
     ...formationsQuiCommencentBientot.map((i) => ({
       type: 'FORMATION_DEMARRE',
-      message: `Formation "${i.formation.nom}" démarre bientôt pour ${i.candidat.nom} ${i.candidat.prenom}`,
+      message: `Formation "${i.formation.nom}" dÃ©marre bientÃ´t pour ${i.candidat.nom} ${i.candidat.prenom}`,
       date: i.dateDebut,
       niveau: 'info',
     })),

@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
 const prisma = new PrismaClient({ adapter });
 
 // POST /api/formations
-// Crée une nouvelle formation dans le catalogue.
+// CrÃ©e une nouvelle formation dans le catalogue.
 export async function POST(request: Request) {
   const body = await request.json();
 

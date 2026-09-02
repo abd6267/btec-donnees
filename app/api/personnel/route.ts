@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql';
 import bcrypt from 'bcryptjs';
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
 });
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   const existant = await prisma.user.findUnique({ where: { username: body.username } });
   if (existant) {
-    return NextResponse.json({ error: 'Ce login existe déjà' }, { status: 400 });
+    return NextResponse.json({ error: 'Ce login existe dÃ©jÃ ' }, { status: 400 });
   }
 
   const passwordHash = await bcrypt.hash(body.password, 10);

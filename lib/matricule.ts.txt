@@ -1,0 +1,37 @@
+// lib/matricule.ts
+// Génération atomique des matricules (FBTEC-xxxx, PBTEC-xxxx, CBTEC-xxxx)
+// Utilise une transaction pour éviter les collisions en cas de créations concurrentes.
+
+import { PrismaClient } from "@prisma/client";
+
+type MatriculePrefix = "FBTEC" | "PBTEC" | "CBTEC";
+
+export async function generateMatricule(
+  prisma: PrismaClient,
+  prefix: MatriculePrefix
+): Promise<string> {
+  const counter = await prisma.$transaction(async (tx) => {
+    return tx.matriculeCounter.upsert({
+      where: { prefix },
+      update: { lastNum: { increment: 1 } },
+      create: { prefix, lastNum: 1 },
+    });
+  });
+
+  const numero = counter.lastNum.toString().padStart(4, "0");
+  return `${prefix}-${numero}`;
+}
+
+// Exemple d'utilisation dans une route API (avec l'adaptateur SQLite) :
+//
+// import { PrismaClient } from "@prisma/client";
+// import { PrismaBetterSQLite3 } from "@prisma/adapter-better-sqlite3";
+// import { generateMatricule } from "@/lib/matricule";
+//
+// const adapter = new PrismaBetterSQLite3({ url: "file:./prisma/dev.db" });
+// const prisma = new PrismaClient({ adapter });
+//
+// const matricule = await generateMatricule(prisma, "FBTEC");
+// const formateur = await prisma.formateur.create({
+//   data: { matricule, ...reste des champs },
+// });

@@ -1,0 +1,43 @@
+import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
+
+const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
+
+async function genererMatricule() {
+  const prefix = 'FBTEC';
+  const counter = await prisma.matriculeCounter.upsert({
+    where: { prefix },
+    update: { lastNum: { increment: 1 } },
+    create: { prefix, lastNum: 1 },
+  });
+  const numero = String(counter.lastNum).padStart(4, '0');
+  return `${prefix}${numero}`;
+}
+
+export async function POST(request: Request) {
+  const body = await request.json();
+
+  const matricule = await genererMatricule();
+
+  const formateur = await prisma.formateur.create({
+    data: {
+      matricule,
+      nom: body.nom,
+      prenom: body.prenom,
+      dateNaissance: new Date(body.dateNaissance),
+      lieuNaissance: body.lieuNaissance,
+      adresseResidence: body.adresseResidence,
+      email: body.email,
+      telephone: body.telephone,
+      niveauEtude: body.niveauEtude,
+      filiere: body.filiere,
+      entiteDiplome: body.entiteDiplome,
+      moyenDeplacement: body.moyenDeplacement === "true",
+      typeContrat: body.typeContrat,
+    },
+  });
+
+  return NextResponse.json({ success: true, matricule: formateur.matricule });
+}

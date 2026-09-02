@@ -1,0 +1,484 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum PendingChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EntretienStatut {
+  PREVU
+  REALISE
+  ANNULE
+}
+
+enum EntretienResultat {
+  ADMIS
+  AJOURNE
+  REFUSE
+}
+
+enum Sexe {
+  M
+  F
+}
+
+enum CandidatStatut {
+  NOUVEAU
+  DOSSIER_INCOMPLET
+  EN_ETUDE
+  VALIDE
+  REFUSE
+}
+
+enum EmployeStatut {
+  EN_ATTENTE
+  EMBAUCHE
+  DEBAUCHE
+}
+
+enum PaiementType {
+  RECETTE
+  DEPENSE
+}
+
+enum PaiementStatut {
+  EN_ATTENTE
+  PAYE
+  EN_RETARD
+}
+
+enum InscriptionStatut {
+  EN_FORMATION
+  FORMATION_TERMINEE
+  EN_ATTENTE_INSERTION
+  ABANDON
+}
+
+enum InscriptionResultat {
+  REUSSI
+  ECHOUE
+  EN_COURS
+}
+
+enum PaiementCategorie {
+  FRAIS_INSCRIPTION
+  FRAIS_OUVERTURE_DOSSIER
+  FRAIS_FORMATION
+  FRAIS_RECRUTEMENT
+  COMMISSIONS
+  PRESTATIONS_RH
+  GESTION_DELEGUEE
+  SALAIRES
+  LOYERS
+  INTERNET
+  PUBLICITE
+  FOURNITURES
+  DEPLACEMENTS
+  AUTRE
+}
+
+enum ModePaiement {
+  CAISSE
+  BANQUE
+}
+
+enum DocumentType {
+  CONTRAT_RECRUTEMENT
+  CONTRAT_FORMATION
+  CONTRAT_PARTENARIAT
+  RECU_PAIEMENT
+  FACTURE
+  ATTESTATION_FORMATION
+  CONVOCATION
+  LETTRE_EMBAUCHE
+  CERTIFICAT_TRAVAIL
+}
+
+// Nouveaux enums — module Placement / Suivi / Débauchage
+
+enum MotifDepartType {
+  DEMISSION
+  LICENCIEMENT
+  FIN_CONTRAT
+  MUTATION
+  AUTRE
+}
+
+enum TypeContratEmploi {
+  CDD
+  CDI
+  STAGE
+  ESSAI
+  AUTRE
+}
+
+enum SatisfactionNiveau {
+  TRES_SATISFAIT
+  SATISFAIT
+  MOYEN
+  INSATISFAIT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  password     String
+
+  nom          String?
+  prenom       String?
+  email        String?  @unique
+  role         String
+  actif        Boolean  @default(true)
+
+  derniereConnexion DateTime?
+
+  createdById     String?
+  createdByUser   User?   @relation("AccountCreator", fields: [createdById], references: [id])
+  createdAccounts User[]  @relation("AccountCreator")
+
+  pendingChangesProposed PendingChange[] @relation("ProposedBy")
+  pendingChangesReviewed PendingChange[] @relation("ReviewedBy")
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  @@index([role])
+}
+
+model Permission {
+  id       String  @id @default(cuid())
+  role     String
+  resource String
+  action   String
+  scope    String?
+
+  @@unique([role, resource, action])
+}
+
+model PendingChange {
+  id           String   @id @default(cuid())
+  resourceType String
+  resourceId   String
+  changes      Json
+
+  status       PendingChangeStatus @default(PENDING)
+
+  proposedById String
+  proposedBy   User @relation("ProposedBy", fields: [proposedById], references: [id])
+
+  reviewedById String?
+  reviewedBy   User? @relation("ReviewedBy", fields: [reviewedById], references: [id])
+  reviewedAt   DateTime?
+
+  createdAt    DateTime @default(now())
+
+  @@index([resourceType, resourceId])
+  @@index([status])
+}
+
+model MatriculeCounter {
+  prefix  String @id
+  lastNum Int    @default(0)
+}
+
+model Formateur {
+  id               String   @id @default(cuid())
+  photoPath        String?
+  domaine          String
+  modulesEnseignes String
+  telephone        String
+  email            String   @unique
+  contratPath      String?
+  honoraires       String
+
+  formations       Formation[]
+  inscriptions     Inscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([domaine])
+}
+
+model Entreprise {
+  id               String   @id @default(cuid())
+  logoPath         String?
+  nom              String
+  directeur        String
+  adresse          String
+  telephone        String
+  email            String   @unique
+  activite         String
+  nombreEmployes   Int
+  datePartenariat  DateTime
+  contratPath      String?
+
+  employes         Employe[]
+  paiements        Paiement[]
+  documents        Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([nom])
+}
+
+model Candidat {
+  id              String         @id @default(cuid())
+  numeroDossier   String         @unique
+  photoPath       String?
+  nom             String
+  prenom          String
+  sexe            Sexe
+  dateNaissance   DateTime
+  telephone       String
+  email           String?
+  adresse         String
+  niveauEtude     String
+  diplome         String
+  posteRecherche  String
+  cvPath          String?
+  lettrePath      String?
+  piecesPath      String?
+  dateInscription DateTime       @default(now())
+  statut          CandidatStatut @default(NOUVEAU)
+  entretiens      Entretien[]
+  employes        Employe[]
+  paiements       Paiement[]
+  inscriptions    Inscription[]
+  documents       Document[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([numeroDossier])
+  @@index([nom, prenom])
+  @@index([statut])
+}
+
+model Entretien {
+  id            String             @id @default(cuid())
+  candidatId    String
+  candidat      Candidat           @relation(fields: [candidatId], references: [id], onDelete: Cascade)
+
+  dateEntretien DateTime
+  notes         String?
+  statut        EntretienStatut    @default(PREVU)
+
+  responsableRH   String?
+  note            Float?
+  resultat        EntretienResultat?
+  compteRendu     String?
+  forces          String?
+  faiblesses      String?
+  recommandations String?
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+
+  @@index([candidatId])
+  @@index([statut])
+  @@index([resultat])
+}
+
+model Employe {
+  id            String        @id @default(cuid())
+
+  candidatId    String
+  candidat      Candidat      @relation(fields: [candidatId], references: [id], onDelete: Cascade)
+
+  entrepriseId  String?
+  entreprise    Entreprise?   @relation(fields: [entrepriseId], references: [id])
+
+  poste         String?
+  statutEmploi  EmployeStatut @default(EN_ATTENTE)
+
+  // Placement — nouveaux champs
+  salaire              Float?
+  typeContrat          TypeContratEmploi?
+  contratPath          String?
+  dureeContrat         String?
+  responsablePlacement String?
+
+  dateEmbauche  DateTime?
+  dateDepart    DateTime?
+  motifDepart   String?
+  motifDepartType MotifDepartType?
+
+  suivis        SuiviPeriodeEssai[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now()) @updatedAt
+
+  @@index([candidatId])
+  @@index([statutEmploi])
+  @@index([entrepriseId])
+}
+
+// ───────── Nouveau modèle — Suivi période d'essai (3 premiers mois) ─────────
+
+model SuiviPeriodeEssai {
+  id            String              @id @default(cuid())
+
+  employeId     String
+  employe       Employe             @relation(fields: [employeId], references: [id], onDelete: Cascade)
+
+  dateSuivi     DateTime            @default(now())
+  mois          Int
+
+  presence      String?
+  ponctualite   String?
+  discipline    String?
+  evaluation    String?
+  satisfaction  SatisfactionNiveau?
+
+  commentaire   String?
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @default(now()) @updatedAt
+
+  @@index([employeId])
+  @@index([mois])
+}
+
+model Paiement {
+  id            String             @id @default(cuid())
+
+  type          PaiementType
+  statut        PaiementStatut     @default(EN_ATTENTE)
+
+  libelle       String
+  montant       Float
+
+  categorie     PaiementCategorie?
+  modePaiement  ModePaiement?      @default(CAISSE)
+
+  candidatId    String?
+  candidat      Candidat?          @relation(fields: [candidatId], references: [id])
+
+  entrepriseId  String?
+  entreprise    Entreprise?        @relation(fields: [entrepriseId], references: [id])
+
+  inscriptionId String?
+  inscription   Inscription?       @relation(fields: [inscriptionId], references: [id])
+
+  documents     Document[]
+
+  dateEcheance  DateTime?
+  datePaiement  DateTime?
+
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @default(now()) @updatedAt
+
+  @@index([type])
+  @@index([statut])
+  @@index([candidatId])
+  @@index([entrepriseId])
+  @@index([inscriptionId])
+  @@index([categorie])
+  @@index([modePaiement])
+}
+
+// ───────── Nouveaux modèles — module Formation ─────────
+
+model Formation {
+  id             String   @id @default(cuid())
+  nom            String
+  programme      String
+  prix           Float
+  dureeJours     Int
+  nombrePlaces   Int
+
+  formateurId    String?
+  formateur      Formateur? @relation(fields: [formateurId], references: [id])
+
+  inscriptions   Inscription[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+
+  @@index([nom])
+}
+
+model Inscription {
+  id               String              @id @default(cuid())
+
+  candidatId       String
+  candidat         Candidat            @relation(fields: [candidatId], references: [id], onDelete: Cascade)
+
+  formationId      String
+  formation        Formation           @relation(fields: [formationId], references: [id])
+
+  formateurId      String?
+  formateur        Formateur?          @relation(fields: [formateurId], references: [id])
+
+  dateDebut        DateTime?
+  dateFin          DateTime?
+
+  statut           InscriptionStatut   @default(EN_FORMATION)
+  resultat         InscriptionResultat?
+  mention          String?
+  attestationPath  String?
+
+  presences        Presence[]
+  paiements        Paiement[]
+  documents        Document[]
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @default(now()) @updatedAt
+
+  @@index([candidatId])
+  @@index([formationId])
+  @@index([statut])
+}
+
+model Presence {
+  id            String      @id @default(cuid())
+
+  inscriptionId String
+  inscription   Inscription @relation(fields: [inscriptionId], references: [id], onDelete: Cascade)
+
+  date          DateTime
+  present       Boolean     @default(true)
+
+  createdAt     DateTime    @default(now())
+
+  @@index([inscriptionId])
+  @@index([date])
+}
+
+// ───────── Nouveau modèle — module Documents ─────────
+
+model Document {
+  id            String       @id @default(cuid())
+  type          DocumentType
+  filePath      String
+
+  candidatId    String?
+  candidat      Candidat?    @relation(fields: [candidatId], references: [id])
+
+  entrepriseId  String?
+  entreprise    Entreprise?  @relation(fields: [entrepriseId], references: [id])
+
+  inscriptionId String?
+  inscription   Inscription? @relation(fields: [inscriptionId], references: [id])
+
+  paiementId    String?
+  paiement      Paiement?    @relation(fields: [paiementId], references: [id])
+
+  genereLe      DateTime     @default(now())
+  genereePar    String?
+
+  createdAt     DateTime     @default(now())
+
+  @@index([type])
+  @@index([candidatId])
+  @@index([entrepriseId])
+}

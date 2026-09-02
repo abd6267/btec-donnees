@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Sexe } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
 import { writeFile } from 'fs/promises';
 import path from 'path';
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       photoPath,
       nom: formData.get('nom') as string,
       prenom: formData.get('prenom') as string,
-      sexe: formData.get('sexe') as string,
+      sexe: formData.get('sexe') as Sexe,
       dateNaissance: new Date(dateNaissance),
       telephone: formData.get('telephone') as string,
       email: (formData.get('email') as string) || null,

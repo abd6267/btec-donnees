@@ -135,6 +135,7 @@ model User {
   prenom       String?
   email        String?  @unique
   role         String
+  fonction     String?
   actif        Boolean  @default(true)
 
   derniereConnexion DateTime?

@@ -10,7 +10,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaBetterSQLite3 } from "@prisma/adapter-better-sqlite3";
 
-const adapter = new PrismaBetterSQLite3({ url: "file:./prisma/dev.db" });
+const adapter = new PrismaBetterSqlite3({ url: "file:./prisma/dev.db" });
 const prisma = new PrismaClient({ adapter });
 
 type PermissionSeed = {

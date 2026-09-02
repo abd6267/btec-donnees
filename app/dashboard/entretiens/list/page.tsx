@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Users, Calendar, Pencil, Check, X } from "lucide-react";
-import RequireRole from "../../components/RequireRole";
-import Sidebar from "../../components/Sidebar";
-import Topbar from "../../components/Topbar";
-import Avatar from "../../components/Avatar";
+import RequireRole from "../../../components/RequireRole";
+import Sidebar from "../../../components/Sidebar";
+import Topbar from "../../../components/Topbar";
+import Avatar from "../../../components/Avatar";
 
 const GREEN = "#16a34a";
 

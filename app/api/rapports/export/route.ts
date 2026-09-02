@@ -35,10 +35,10 @@ export async function GET(request: Request) {
 
     const wsFinance = XLSX.utils.json_to_sheet(
       paiements.map((p) => ({
-        LibellÃ©: p.libelle,
+        Libellé: p.libelle,
         Type: p.type,
         Montant: p.montant,
-        CatÃ©gorie: p.categorie,
+        Catégorie: p.categorie,
         Statut: p.statut,
         'Date paiement': p.datePaiement,
       }))
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
         Candidat: `${i.candidat.nom} ${i.candidat.prenom}`,
         Formation: i.formation.nom,
         Statut: i.statut,
-        RÃ©sultat: i.resultat,
+        Résultat: i.resultat,
         Mention: i.mention,
       }))
     );
@@ -66,5 +66,5 @@ export async function GET(request: Request) {
     });
   }
 
-  return NextResponse.json({ error: 'Format non supportÃ©' }, { status: 400 });
+  return NextResponse.json({ error: 'Format non supporté' }, { status: 400 });
 }
